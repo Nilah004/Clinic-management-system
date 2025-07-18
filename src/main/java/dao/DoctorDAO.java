@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Doctor;
+import model.DoctorAvailability;
 import util.DBConnection;
 
 public class DoctorDAO {
@@ -20,6 +21,7 @@ public class DoctorDAO {
         }
     }
 
+    // ✅ Fetch all doctors with department and availability
     public List<Doctor> getAllDoctors() {
         List<Doctor> list = new ArrayList<>();
         try {
@@ -27,12 +29,21 @@ public class DoctorDAO {
                            "FROM doctors d JOIN departments dept ON d.department_id = dept.id";
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
+
+            DoctorAvailabilityDAO availabilityDAO = new DoctorAvailabilityDAO();
+
             while (rs.next()) {
                 Doctor doc = new Doctor();
-                doc.setId(rs.getInt("id"));
+                int doctorId = rs.getInt("id");
+                doc.setId(doctorId);
                 doc.setName(rs.getString("name"));
                 doc.setEmail(rs.getString("email"));
                 doc.setDepartmentName(rs.getString("departmentName"));
+
+                // 🔽 Fetch availability
+                List<DoctorAvailability> availabilityList = availabilityDAO.getAvailabilityByDoctorId(doctorId);
+                doc.setAvailabilityList(availabilityList);
+
                 list.add(doc);
             }
         } catch (Exception e) {
@@ -41,15 +52,16 @@ public class DoctorDAO {
         return list;
     }
 
+    // ✅ Add doctor (including user record)
     public boolean insertDoctor(String name, String email, int departmentId) {
         Connection con = null;
         PreparedStatement psDoctor = null;
         PreparedStatement psUser = null;
         try {
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/clinic_db", "root", "");
-            con.setAutoCommit(false);  // Start transaction
+            con.setAutoCommit(false);  // Transaction
 
-            // Insert into doctors table
+            // Insert into doctors
             String doctorQuery = "INSERT INTO doctors (name, email, department_id) VALUES (?, ?, ?)";
             psDoctor = con.prepareStatement(doctorQuery);
             psDoctor.setString(1, name);
@@ -57,14 +69,14 @@ public class DoctorDAO {
             psDoctor.setInt(3, departmentId);
             psDoctor.executeUpdate();
 
-            // Insert into users table with NULL password
+            // Insert into users
             String userQuery = "INSERT INTO users (name, email, password, role) VALUES (?, ?, NULL, 'doctor')";
             psUser = con.prepareStatement(userQuery);
             psUser.setString(1, name);
             psUser.setString(2, email);
             psUser.executeUpdate();
 
-            con.commit();  // Success
+            con.commit();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +88,8 @@ public class DoctorDAO {
             try { if (con != null) con.close(); } catch (SQLException ignored) {}
         }
     }
-    
+
+    // ✅ Update doctor
     public boolean updateDoctor(int id, String name, String email, int deptId) {
         try {
             Connection conn = DBConnection.getConnection();
@@ -93,6 +106,7 @@ public class DoctorDAO {
         return false;
     }
 
+    // ✅ Delete doctor
     public boolean deleteDoctor(int id) {
         try {
             String sql = "DELETE FROM doctors WHERE id = ?";
@@ -104,8 +118,4 @@ public class DoctorDAO {
             return false;
         }
     }
-
-
-
-
 }

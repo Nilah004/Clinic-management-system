@@ -34,23 +34,17 @@
         label {
             margin-top: 10px;
             display: block;
+            font-weight: bold;
         }
-        select, input {
+        select, input[type="text"], input[type="number"], select, button {
             padding: 10px;
             width: 100%;
             margin-top: 5px;
             margin-bottom: 15px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            padding: 12px;
-            border: none;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #0056b3;
+            box-sizing: border-box;
+            font-size: 16px;
         }
         .message {
             background-color: #d4edda;
@@ -59,9 +53,14 @@
             margin-bottom: 15px;
             border-radius: 5px;
         }
+        .slot-option {
+            display: block;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
+
 <div class="container">
     <h2>Welcome, <%= user.getName() %> - Book Appointment</h2>
 
@@ -77,21 +76,63 @@
 
     <form action="<%= request.getContextPath() %>/bookAppointment" method="post">
 
-        <label>Select Doctor</label>
-        <select name="doctorId" required>
+        <label for="doctorSelect">Select Doctor</label>
+        <select name="doctorId" id="doctorSelect" required>
+            <option value="">-- Select Doctor --</option>
             <% for (Doctor d : doctors) { %>
                 <option value="<%= d.getId() %>"><%= d.getName() %> - <%= d.getDepartmentName() %></option>
             <% } %>
         </select>
 
-        <label>Date</label>
-        <input type="date" name="date" required>
+        <label for="slot">Select Available Time Slot</label>
+<div id="slotContainer">
+    <p>Select a doctor to view available slots.</p>
+</div>
 
-        <label>Time</label>
-        <input type="time" name="time" required>
+
+        <label for="fullName">Full Name</label>
+        <input type="text" name="fullName" id="fullName" required>
+
+        <label for="contact">Contact</label>
+        <input type="text" name="contact" id="contact" required>
+
+        <label for="age">Age</label>
+        <input type="number" name="age" id="age" required>
+
+        <label for="gender">Gender</label>
+        <select name="gender" id="gender" required>
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
 
         <button type="submit">Book Appointment</button>
     </form>
 </div>
+
+<script>
+document.getElementById("doctorSelect").addEventListener("change", function () {
+    const doctorId = this.value;
+    const slotContainer = document.getElementById("slotContainer");
+    slotContainer.innerHTML = "<p>Loading slots...</p>";
+
+    if (!doctorId) {
+        slotContainer.innerHTML = "<p>Select a doctor to view available slots.</p>";
+        return;
+    }
+
+    fetch("<%=request.getContextPath()%>/getAvailableTimes?doctorId=" + doctorId)
+        .then(response => response.text())
+        .then(html => {
+            slotContainer.innerHTML = html;
+        })
+        .catch(error => {
+            console.error("Error loading slots:", error);
+            slotContainer.innerHTML = "<p>Failed to load slots.</p>";
+        });
+});
+</script>
+
+
 </body>
 </html>

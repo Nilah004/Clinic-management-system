@@ -5,12 +5,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.Appointment;
-import java.time.LocalTime;
 import model.User;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.*;
 
 @WebServlet("/bookAppointment")
 public class BookAppointmentServlet extends HttpServlet {
@@ -25,36 +25,54 @@ public class BookAppointmentServlet extends HttpServlet {
 
         try {
             int doctorId = Integer.parseInt(req.getParameter("doctorId"));
-            Date date = Date.valueOf(req.getParameter("date"));
+            String slot = req.getParameter("slot");  // ✅ FIXED: this must match radio input name
 
-            // ✅ Convert HH:mm to HH:mm:ss properly
-            LocalTime lt = LocalTime.parse(req.getParameter("time")); // parses HH:mm
-            Time time = Time.valueOf(lt); // converts to HH:mm:ss
+            if (slot == null || !slot.contains("|")) {
+                session.setAttribute("msg", "Invalid time slot selected.");
+                res.sendRedirect("view/patientDashboard.jsp");
+                return;
+            }
 
+            String[] parts = slot.split("\\|");
+            String dayOfWeekStr = parts[0];
+            String timeStr = parts[1];
+
+            // Get next date for selected day
+            DayOfWeek selectedDay = DayOfWeek.valueOf(dayOfWeekStr.toUpperCase());
+            LocalDate today = LocalDate.now();
+            int daysUntil = (selectedDay.getValue() - today.getDayOfWeek().getValue() + 7) % 7;
+            LocalDate appointmentDate = today.plusDays(daysUntil == 0 ? 7 : daysUntil);
+            Date sqlDate = Date.valueOf(appointmentDate);
+            Time sqlTime = Time.valueOf(timeStr);
+
+            // Get patient info
+            String fullName = req.getParameter("fullName");
+            String contact = req.getParameter("contact");
+            int age = Integer.parseInt(req.getParameter("age"));
+            String gender = req.getParameter("gender");
+
+            // Build Appointment object
             Appointment app = new Appointment();
             app.setPatientId(patient.getId());
             app.setDoctorId(doctorId);
-            app.setAppointmentDate(date);
-            app.setAppointmentTime(time);
+            app.setAppointmentDate(sqlDate);
+            app.setAppointmentTime(sqlTime);
+            app.setPatientName(fullName);
+            app.setContact(contact);
+            app.setAge(age);
+            app.setGender(gender);
 
+            // Save to DB
             AppointmentDAO dao = new AppointmentDAO();
             boolean success = dao.bookAppointment(app);
 
-            if (success) {
-                session.setAttribute("msg", "Appointment booked successfully.");
-            } else {
-                session.setAttribute("msg", "Failed to book appointment.");
-            }
-
+            session.setAttribute("msg", success ? "Appointment booked successfully." : "Failed to book appointment.");
             res.sendRedirect("view/patientDashboard.jsp");
 
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("msg", "Something went wrong: " + e.getMessage());
+            session.setAttribute("msg", "Error: " + e.getMessage());
             res.sendRedirect("view/patientDashboard.jsp");
         }
     }
 }
-
-
-

@@ -1,40 +1,37 @@
 package model;
 
+import java.util.List;
+import model.DoctorAvailability;
+
 public class Doctor {
     private int id;
     private String name;
     private String email;
+    private int departmentId;
     private String departmentName;
 
-    // Constructor
-    public Doctor() {}
+    // 🔽 Add this field for availability
+    private List<DoctorAvailability> availabilityList;
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
+    // --- Getters ---
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public int getDepartmentId() { return departmentId; }
+    public String getDepartmentName() { return departmentName; }
 
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
+    public List<DoctorAvailability> getAvailabilityList() {
+        return availabilityList;
     }
 
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    // --- Setters ---
+    public void setId(int id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setEmail(String email) { this.email = email; }
+    public void setDepartmentId(int departmentId) { this.departmentId = departmentId; }
+    public void setDepartmentName(String departmentName) { this.departmentName = departmentName; }
 
-    public String getDepartmentName() {
-        return departmentName;
-    }
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+    public void setAvailabilityList(List<DoctorAvailability> availabilityList) {
+        this.availabilityList = availabilityList;
     }
 }

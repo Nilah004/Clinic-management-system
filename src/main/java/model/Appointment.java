@@ -1,4 +1,3 @@
-// src/model/Appointment.java
 package model;
 
 import java.sql.Date;
@@ -16,6 +15,11 @@ public class Appointment {
     private String doctorName;
     private String department;
     private String status;
+
+    // Additional fields to collect during booking
+    private String contact;
+    private int age;
+    private String gender;
 
     // --- Getters ---
     public int getId() {
@@ -54,6 +58,18 @@ public class Appointment {
         return status;
     }
 
+    public String getContact() {
+        return contact;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
     // --- Setters ---
     public void setId(int id) {
         this.id = id;
@@ -89,5 +105,17 @@ public class Appointment {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }
