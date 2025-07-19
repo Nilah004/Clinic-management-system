@@ -118,4 +118,22 @@ public class DoctorDAO {
             return false;
         }
     }
+    
+    public int getDoctorIdByUserId(int userId) {
+        int doctorId = -1;
+        try {
+            String sql = "SELECT id FROM doctors WHERE user_id = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                doctorId = rs.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return doctorId;
+    }
+
+
 }

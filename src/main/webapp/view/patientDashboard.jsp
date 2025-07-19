@@ -36,14 +36,13 @@
             display: block;
             font-weight: bold;
         }
-        select, input[type="text"], input[type="number"], select, button {
+        select, input[type="text"], input[type="number"], button {
             padding: 10px;
             width: 100%;
             margin-top: 5px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box;
             font-size: 16px;
         }
         .message {
@@ -53,9 +52,15 @@
             margin-bottom: 15px;
             border-radius: 5px;
         }
-        .slot-option {
+        .link-btn {
+            background-color: #007BFF;
+            color: white;
+            text-align: center;
+            padding: 10px;
             display: block;
-            margin-bottom: 8px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -85,10 +90,9 @@
         </select>
 
         <label for="slot">Select Available Time Slot</label>
-<div id="slotContainer">
-    <p>Select a doctor to view available slots.</p>
-</div>
-
+        <div id="slotContainer">
+            <p>Select a doctor to view available slots.</p>
+        </div>
 
         <label for="fullName">Full Name</label>
         <input type="text" name="fullName" id="fullName" required>
@@ -108,6 +112,8 @@
 
         <button type="submit">Book Appointment</button>
     </form>
+
+    <a href="patientAppointments.jsp" class="link-btn">View Appointment History</a>
 </div>
 
 <script>
@@ -132,7 +138,6 @@ document.getElementById("doctorSelect").addEventListener("change", function () {
         });
 });
 </script>
-
 
 </body>
 </html>
