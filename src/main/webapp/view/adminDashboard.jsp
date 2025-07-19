@@ -1,7 +1,7 @@
 <%@ page session="true" import="model.User" %>
 <%@ page import="dao.DepartmentDAO, dao.DoctorDAO, dao.UserDAO" %>
 <%@ page import="java.util.List" %>
-<%@ page import="model.Department, model.Doctor" %>
+<%@ page import="model.Department, model.Doctor, model.User, model.DoctorAvailability" %>
 
 <%
     User user = (User) session.getAttribute("user");
@@ -25,7 +25,7 @@
     <title>Admin Dashboard</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 1000px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 1100px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         h1, h2 { color: #007BFF; }
         .section { margin-bottom: 30px; }
         label, select, input { display: block; margin: 8px 0; width: 100%; padding: 8px; }
@@ -48,7 +48,6 @@
         </div>
     <% session.removeAttribute("msg"); } %>
 
-    <!-- Overview -->
     <div class="section">
         <h2>Clinic Overview</h2>
         <ul>
@@ -58,7 +57,6 @@
         </ul>
     </div>
 
-    <!-- Patients -->
     <div class="section">
         <h2>Registered Patients</h2>
         <table>
@@ -80,7 +78,7 @@
                     <td><input type="email" name="email" value="<%= patient.getEmail() %>" required></td>
                     <td>
                         <input type="hidden" name="id" value="<%= patient.getId() %>">
-                        <button type="submit" onclick="return confirm('Update this patient?');">Update</button>
+                        <button type="submit">Update</button>
                     </td>
                 </form>
                 <td>
@@ -94,7 +92,6 @@
         </table>
     </div>
 
-    <!-- Add Department -->
     <div class="section">
         <h2>Add Department</h2>
         <form action="<%= request.getContextPath() %>/addDepartment" method="post">
@@ -104,61 +101,48 @@
         </form>
     </div>
 
-    <!-- Add Doctor -->
     <div class="section">
-        <h2>Add Doctor</h2>
-        <form action="<%= request.getContextPath() %>/addDoctor" method="post">
+    <h2>Add Doctor with Multiple Availability</h2>
+    <form action="<%= request.getContextPath() %>/addDoctor" method="post">
+        <label>Name</label>
+        <input type="text" name="name" required>
 
-            <label>Name</label>
-            <input type="text" name="name" required>
+        <label>Email</label>
+        <input type="email" name="email" required>
 
-            <label>Email</label>
-            <input type="email" name="email" required>
+        <label>Department</label>
+        <select name="departmentId" required>
+            <% for (Department d : departments) { %>
+                <option value="<%= d.getId() %>"><%= d.getName() %></option>
+            <% } %>
+        </select>
 
-            <label>Department</label>
-            <select name="departmentId" required>
-                <% for (Department d : departments) { %>
-                    <option value="<%= d.getId() %>"><%= d.getName() %></option>
-                <% } %>
-            </select>
+        <div id="availability-section">
+            <div class="availability-group">
+                <label>Day of Week</label>
+                <select name="dayOfWeek" required>
+                    <option>Monday</option>
+                    <option>Tuesday</option>
+                    <option>Wednesday</option>
+                    <option>Thursday</option>
+                    <option>Friday</option>
+                    <option>Saturday</option>
+                    <option>Sunday</option>
+                </select>
 
-            <button type="submit">Add Doctor</button>
-        </form>
-    </div>
+                <label>Start Time</label>
+                <input type="time" name="startTime" required>
 
-    <!-- Set Doctor Availability -->
-    <div class="section">
-        <h2>Set Doctor Availability</h2>
-        <form action="<%= request.getContextPath() %>/addAvailability" method="post">
-            <label>Doctor</label>
-            <select name="doctorId">
-                <% for (Doctor d : doctors) { %>
-                    <option value="<%= d.getId() %>"><%= d.getName() %></option>
-                <% } %>
-            </select>
+                <label>End Time</label>
+                <input type="time" name="endTime" required>
+            </div>
+        </div>
 
-            <label>Day of Week</label>
-            <select name="dayOfWeek">
-                <option>Monday</option>
-                <option>Tuesday</option>
-                <option>Wednesday</option>
-                <option>Thursday</option>
-                <option>Friday</option>
-                <option>Saturday</option>
-                <option>Sunday</option>
-            </select>
+        <button type="button" onclick="addAvailability()">+ Add More Availability</button><br><br>
+        <button type="submit">Add Doctor</button>
+    </form>
+</div>
 
-            <label>Start Time</label>
-            <input type="time" name="startTime" required>
-
-            <label>End Time</label>
-            <input type="time" name="endTime" required>
-
-            <button type="submit">Add Availability</button>
-        </form>
-    </div>
-
-    <!-- Doctors List -->
     <div class="section">
         <h2>Doctors & Availability</h2>
         <table>
@@ -194,9 +178,9 @@
                     </td>
                 </form>
                 <td>
-                    <form action="<%= request.getContextPath() %>/deleteDoctor" method="get">
+                    <form action="<%= request.getContextPath() %>/deleteDoctor" method="get" onsubmit="return confirm('Delete doctor and all their availability?');">
                         <input type="hidden" name="id" value="<%= d.getId() %>">
-                        <button type="submit" onclick="return confirm('Delete doctor?');">Delete</button>
+                        <button type="submit">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -212,7 +196,7 @@
                                 <th>End Time</th>
                                 <th>Action</th>
                             </tr>
-                            <% for (model.DoctorAvailability av : d.getAvailabilityList()) { %>
+                            <% for (DoctorAvailability av : d.getAvailabilityList()) { %>
                                 <tr>
                                     <form action="<%= request.getContextPath() %>/updateAvailability" method="post">
                                         <td><input type="text" name="dayOfWeek" value="<%= av.getDayOfWeek() %>" required></td>
@@ -221,7 +205,7 @@
                                         <td>
                                             <input type="hidden" name="availabilityId" value="<%= av.getId() %>">
                                             <button type="submit">Update</button>
-                                            <a href="<%= request.getContextPath() %>/deleteAvailability?id=<%= av.getId() %>" onclick="return confirm('Delete availability?');">Delete</a>
+                                            <a href="<%= request.getContextPath() %>/deleteAvailability?id=<%= av.getId() %>" onclick="return confirm('Delete this slot?');">Delete</a>
                                         </td>
                                     </form>
                                 </tr>
@@ -229,17 +213,53 @@
                         </table>
                     </td>
                 </tr>
-            <% } else { %>
-                <tr>
-                    <td colspan="6" style="color:gray;">No availability set</td>
-                </tr>
             <% } %>
+
+            <!-- New availability add form -->
+            <tr>
+                <td colspan="6">
+                    <strong>Add New Availability</strong>
+                    <form action="<%= request.getContextPath() %>/addAvailability" method="post" style="margin-top:10px;">
+                        <input type="hidden" name="doctorId" value="<%= d.getId() %>">
+                        <label>Day</label>
+                        <select name="dayOfWeek" required>
+                            <option>Monday</option>
+                            <option>Tuesday</option>
+                            <option>Wednesday</option>
+                            <option>Thursday</option>
+                            <option>Friday</option>
+                            <option>Saturday</option>
+                            <option>Sunday</option>
+                        </select>
+                        <label>Start Time</label>
+                        <input type="time" name="startTime" required>
+                        <label>End Time</label>
+                        <input type="time" name="endTime" required>
+                        <button type="submit">Add Slot</button>
+                    </form>
+                </td>
+            </tr>
             <% } %>
         </table>
     </div>
 
-    <p><a href="<%= request.getContextPath() %>/view/appointments.jsp">View Appointments</a></p>
+    <p><a href="<%= request.getContextPath() %>/view/appointments.jsp">View All Appointments</a></p>
 </div>
+
+<script>
+function addAvailability() {
+    const section = document.getElementById("availability-section");
+    const group = document.querySelector(".availability-group");
+    const clone = group.cloneNode(true);
+
+    // Clear values in cloned inputs
+    const inputs = clone.querySelectorAll("input, select");
+    inputs.forEach(input => input.value = '');
+
+    section.appendChild(clone);
+}
+</script>
+
 
 </body>
 </html>

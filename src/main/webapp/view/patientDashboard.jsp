@@ -115,6 +115,7 @@
 
     <a href="patientAppointments.jsp" class="link-btn">View Appointment History</a>
 </div>
+<p><a href="<%= request.getContextPath() %>/view/profile.jsp">My Profile</a></p>
 
 <script>
 document.getElementById("doctorSelect").addEventListener("change", function () {
