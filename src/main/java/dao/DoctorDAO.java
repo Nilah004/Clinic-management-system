@@ -9,6 +9,8 @@ import model.Doctor;
 import model.DoctorAvailability;
 import util.DBConnection;
 
+
+
 public class DoctorDAO {
     private Connection conn;
 
@@ -119,20 +121,115 @@ public class DoctorDAO {
         }
     }
     
-    public int getDoctorIdByUserId(int userId) {
-        int doctorId = -1;
+    public List<DoctorAvailability> getAvailabilityByDoctorId(int doctorId) {
+        List<DoctorAvailability> availabilityList = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
         try {
-            String sql = "SELECT id FROM doctors WHERE user_id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                doctorId = rs.getInt("id");
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/clinic_db", "root", "");
+
+            String sql = "SELECT * FROM doctor_availability WHERE doctor_id = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, doctorId);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                DoctorAvailability da = new DoctorAvailability();
+                da.setId(rs.getInt("id"));
+                da.setDoctorId(rs.getInt("doctor_id"));
+                da.setDayOfWeek(rs.getString("day_of_week"));
+                da.setStartTime(Time.valueOf(rs.getString("start_time")));
+                da.setEndTime(Time.valueOf(rs.getString("end_time")));
+
+
+                availabilityList.add(da);
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception ignored) {}
+            try { if (stmt != null) stmt.close(); } catch (Exception ignored) {}
+            try { if (conn != null) conn.close(); } catch (Exception ignored) {}
+        }
+
+        return availabilityList;
+    }
+
+    public Doctor getDoctorByUserId(int userId) {
+        Doctor doctor = null;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM doctors WHERE user_id = ?")) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                doctor = new Doctor();
+                doctor.setId(rs.getInt("id"));
+                doctor.setName(rs.getString("name"));
+                doctor.setEmail(rs.getString("email"));
+                doctor.setDepartmentId(rs.getInt("department_id"));
+                doctor.setAvailabilityList(getDoctorAvailability(rs.getInt("id"))); // Load availability
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return doctor;
+    }
+    
+    public int getDoctorIdByUserId(int userId) {
+        int doctorId = -1;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT id FROM doctors WHERE user_id = ?")) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                doctorId = rs.getInt("id");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return doctorId;
+    }
+
+
+    public List<DoctorAvailability> getDoctorAvailability(int doctorId) {
+        List<DoctorAvailability> list = new ArrayList<>();
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM doctor_availability WHERE doctor_id = ?")) {
+
+            stmt.setInt(1, doctorId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                DoctorAvailability da = new DoctorAvailability();
+                da.setId(rs.getInt("id"));
+                da.setDoctorId(rs.getInt("doctor_id"));
+                da.setDayOfWeek(rs.getString("day_of_week"));
+                da.setStartTime(rs.getTime("start_time"));
+                da.setEndTime(rs.getTime("end_time"));
+
+                list.add(da);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 
 

@@ -4,6 +4,9 @@ package model;
 public class User {
     private int id;
     private String name, email, password, role;
+    private String gender;
+    private String contact;
+    private int age;
 
     // Getters & Setters
     public int getId() { return id; }
@@ -20,4 +23,27 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    
+
+public String getGender() {
+    return gender;
+}
+
+public void setGender(String gender) {
+    this.gender = gender;
+}
+public String getContact() {
+    return contact;
+}
+public void setContact(String contact) {
+    this.contact = contact;
+}
+
+// Getter and Setter for age
+public int getAge() {
+    return age;
+}
+public void setAge(int age) {
+    this.age = age;
+}
 }

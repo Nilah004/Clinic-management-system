@@ -25,5 +25,7 @@
         <li><a href="#">Add Diagnosis/Prescription</a></li>
     </ul>
     <p><a href="logout.jsp">Logout</a></p>
+    <p><a href="doctorAvailability.jsp">View My Availability</a></p>
+    
 </body>
 </html>

@@ -44,8 +44,6 @@ public class DoctorAvailabilityDAO {
         return list;
     }
 
-
-    
     public boolean addAvailability(DoctorAvailability availability) {
         try {
             String query = "INSERT INTO doctor_availability (doctor_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?)";
