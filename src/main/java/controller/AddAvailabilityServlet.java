@@ -1,4 +1,3 @@
-// src/controller/AddAvailabilityServlet.java
 package controller;
 
 import dao.DoctorAvailabilityDAO;

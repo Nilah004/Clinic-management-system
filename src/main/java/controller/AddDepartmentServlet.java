@@ -1,4 +1,3 @@
-// src/controller/AddDepartmentServlet.java
 package controller;
 
 import jakarta.servlet.*;

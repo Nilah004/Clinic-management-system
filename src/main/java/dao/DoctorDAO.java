@@ -232,5 +232,26 @@ public class DoctorDAO {
         return list;
     }
 
+    public String getDoctorDepartmentName(int doctorId) {
+        String name = "";
+
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(
+                "SELECT d.name FROM departments d JOIN doctors doc ON d.id = doc.department_id WHERE doc.id = ?");
+            stmt.setInt(1, doctorId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                name = rs.getString("name");
+            }
+
+            rs.close(); stmt.close(); conn.close();
+        } catch (Exception e) {
+            e.printStackTrace(); 
+        }
+
+        return name;
+    }
 
 }

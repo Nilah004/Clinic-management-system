@@ -6,165 +6,123 @@
         response.sendRedirect("login.jsp");
         return;
     }
-
     AppointmentDAO dao = new AppointmentDAO();
     DoctorDAO docDao = new DoctorDAO();
-
     List<Appointment> appointments = dao.getAllAppointments();
     int doctorId = -1;
-
     if ("doctor".equalsIgnoreCase(user.getRole())) {
         doctorId = docDao.getDoctorIdByUserId(user.getId());
     }
 %>
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Appointments</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #f2f2f2;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 1000px;
-            margin: auto;
-            box-shadow: 0 0 10px #ccc;
-        }
-        h2 {
-            color: #007BFF;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background: #007BFF;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        .msg-success {
-            background-color: #d4edda;
-            border: 1px solid #28a745;
-            padding: 10px;
-            border-radius: 5px;
-            color: #155724;
-            margin-bottom: 15px;
-        }
-        .msg-error {
-            background-color: #f8d7da;
-            border: 1px solid #dc3545;
-            padding: 10px;
-            border-radius: 5px;
-            color: #721c24;
-            margin-bottom: 15px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - MediTrackPro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin.css"> <!-- Link to the admin.css for consistent styling -->
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <header class="admin-header">
+        <h1>Appointments</h1>
+        <a href="<%= request.getContextPath() %>/logout" class="logout-link">Logout <i class="fas fa-sign-out-alt"></i></a>
+    </header>
 
-<div class="container">
-
-<%
-    String msg = (String) session.getAttribute("msg");
-    if (msg != null) {
-        boolean isSuccess = msg.toLowerCase().contains("success");
-%>
-    <div class="<%= isSuccess ? "msg-success" : "msg-error" %>">
-        <%= msg %>
-    </div>
-<%
-        session.removeAttribute("msg");
-    }
-%>
-
-    <h2>Appointments</h2>
-
-    <% boolean hasAppointments = false; %>
-    <table>
-        <tr>
-            <th>Patient</th>
-            <th>Doctor</th>
-            <th>Department</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Status</th>
-            <% if ("admin".equalsIgnoreCase(user.getRole()) || "doctor".equalsIgnoreCase(user.getRole())) { %>
-                <th>Actions</th>
-            <% } %>
-        </tr>
-
+    <div class="container">
         <%
-            java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat("EEEE, MMM dd yyyy");
-            java.text.SimpleDateFormat timeFormatter = new java.text.SimpleDateFormat("hh:mm a");
-
-            for (Appointment app : appointments) {
-
-                // Doctor should only see their own confirmed appointments
-                if ("doctor".equalsIgnoreCase(user.getRole())) {
-                    if (app.getDoctorId() != doctorId || !"Confirmed".equalsIgnoreCase(app.getStatus())) {
-                        continue;
-                    }
-                }
-
-                hasAppointments = true;
+            String msg = (String) session.getAttribute("msg");
+            if (msg != null) {
+                boolean isSuccess = msg.toLowerCase().contains("success");
         %>
-        <tr>
-            <td><%= app.getPatientName() %></td>
-            <td><%= app.getDoctorName() %></td>
-            <td><%= app.getDepartment() %></td>
-            <td><%= dateFormatter.format(app.getAppointmentDate()) %></td>
-            <td><%= timeFormatter.format(app.getAppointmentTime()) %></td>
-            <td><%= app.getStatus() != null ? app.getStatus() : "Pending" %></td>
+            <div class="message-box <%= isSuccess ? "success" : "error" %>">
+                <%= msg %>
+            </div>
+        <%
+                session.removeAttribute("msg");
+            }
+        %>
+        
+        <div style="margin-bottom: 20px; text-align: right;">
+            <a href="<%= request.getContextPath() %>/view/adminDashboard.jsp" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Go Back to Dashboard
+            </a>
+        </div>
 
-            <td>
-                <% if ("admin".equalsIgnoreCase(user.getRole())) { %>
-                   <form action="<%= request.getContextPath() %>/updateAppointmentStatus" method="post">
-                        <input type="hidden" name="appointmentId" value="<%= app.getId() %>">
-                        <select name="status" onchange="this.form.submit()">
-                            <option disabled selected>Change</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Confirmed">Confirmed</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </form>
-                <% } else if ("doctor".equalsIgnoreCase(user.getRole())) { %>
-                    <form action="<%= request.getContextPath() %>/updateAppointmentStatus" method="post">
-
-                        <input type="hidden" name="appointmentId" value="<%= app.getId() %>">
-                        <input type="hidden" name="status" value="Completed">
-                        <button type="submit">Mark as Completed</button>
-                    </form>
-
-                    <form action="<%= request.getContextPath() %>/updateAppointmentStatus" method="post">
-
-                        <input type="hidden" name="appointmentId" value="<%= app.getId() %>">
-                        <input type="hidden" name="status" value="No-show">
-                        <button type="submit">Mark as No-show</button>
-                    </form>
+        <h2>All Appointments</h2>
+        <% boolean hasAppointments = false; %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <% if ("admin".equalsIgnoreCase(user.getRole()) || "doctor".equalsIgnoreCase(user.getRole())) { %>
+                        <th>Actions</th>
+                    <% } %>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat("EEEE, MMM dd yyyy");
+                    java.text.SimpleDateFormat timeFormatter = new java.text.SimpleDateFormat("hh:mm a");
+                    for (Appointment app : appointments) {
+                        // Doctor should only see their own confirmed appointments
+                        if ("doctor".equalsIgnoreCase(user.getRole())) {
+                            if (app.getDoctorId() != doctorId || !"Confirmed".equalsIgnoreCase(app.getStatus())) {
+                                continue;
+                            }
+                        }
+                        hasAppointments = true;
+                %>
+                <tr>
+                    <td data-label="Patient"><%= app.getPatientName() %></td>
+                    <td data-label="Doctor"><%= app.getDoctorName() %></td>
+                    <td data-label="Department"><%= app.getDepartment() %></td>
+                    <td data-label="Date"><%= dateFormatter.format(app.getAppointmentDate()) %></td>
+                    <td data-label="Time">
+  <%= timeFormatter.format(app.getAppointmentTime()) %>
+  -
+  <%= app.getEndTime() != null ? timeFormatter.format(app.getEndTime()) : "N/A" %>
+</td>
+                    
+                    <td data-label="Status"><%= app.getStatus() != null ? app.getStatus() : "Pending" %></td>
+                    <td data-label="Actions">
+                        <% if ("admin".equalsIgnoreCase(user.getRole())) { %>
+                           <form action="<%= request.getContextPath() %>/updateAppointmentStatus" method="post" style="display:inline-block; margin-right: 5px;">
+                                <input type="hidden" name="appointmentId" value="<%= app.getId() %>">
+                                <select name="status" onchange="this.form.submit()" class="form-control">
+                                    <option disabled selected>Change</option>
+                                    <option value="Pending" <%= "Pending".equalsIgnoreCase(app.getStatus()) ? "selected" : "" %>>Pending</option>
+                                    <option value="Confirmed" <%= "Confirmed".equalsIgnoreCase(app.getStatus()) ? "selected" : "" %>>Confirmed</option>
+                                    <option value="Cancelled" <%= "Cancelled".equalsIgnoreCase(app.getStatus()) ? "selected" : "" %>>Cancelled</option>
+                                </select>
+                            </form>
+                        <% } else if ("doctor".equalsIgnoreCase(user.getRole())) { %>
+                            <form action="<%= request.getContextPath() %>/updateAppointmentStatus" method="post" style="display:inline-block; margin-right: 5px;">
+                                <input type="hidden" name="appointmentId" value="<%= app.getId() %>">
+                                <input type="hidden" name="status" value="Completed">
+                                <button type="submit" class="btn btn-primary btn-sm">Mark as Completed</button>
+                            </form>
+                            <form action="<%= request.getContextPath() %>/updateAppointmentStatus" method="post" style="display:inline-block;">
+                                <input type="hidden" name="appointmentId" value="<%= app.getId() %>">
+                                <input type="hidden" name="status" value="No-show">
+                                <button type="submit" class="btn btn-danger btn-sm">Mark as No-show</button>
+                            </form>
+                        <% } %>
+                    </td>
+                </tr>
                 <% } %>
-            </td>
-        </tr>
+            </tbody>
+        </table>
+        <% if (!hasAppointments) { %>
+            <p style="text-align: center; margin-top: 20px; color: #6c757d;">No appointments found.</p>
         <% } %>
-    </table>
-
-    <% if (!hasAppointments) { %>
-        <p>No appointments found.</p>
-    <% } %>
-</div>
-
+    </div>
 </body>
 </html>

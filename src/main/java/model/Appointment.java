@@ -9,12 +9,19 @@ public class Appointment {
     private int doctorId;
     private Date appointmentDate;
     private Time appointmentTime;
+    private String timeSlot;
+    private Date date;
+    private Time endTime;
+
+   
 
     // Extra fields for viewing
     private String patientName;
     private String doctorName;
     private String department;
     private String status;
+    
+   
 
     // Additional fields to collect during booking
     private String contact;
@@ -30,6 +37,20 @@ public class Appointment {
         return patientId;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+public String getTimeSlot() {
+    return timeSlot;
+}
+
+public void setTimeSlot(String timeSlot) {
+    this.timeSlot = timeSlot;
+}
     public int getDoctorId() {
         return doctorId;
     }
@@ -109,6 +130,14 @@ public class Appointment {
 
     public void setContact(String contact) {
         this.contact = contact;
+    }
+    
+    public Time getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Time endTime) {
+        this.endTime = endTime;
     }
 
     public void setAge(int age) {

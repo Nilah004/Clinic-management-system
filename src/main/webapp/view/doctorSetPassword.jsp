@@ -1,77 +1,39 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="jakarta.servlet.http.*, jakarta.servlet.*, java.sql.*, dao.UserDAO" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Set Password</title>
-    <style>
-    
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f0f0;
-            padding: 40px;
-        }
-        .container {
-            background: white;
-            max-width: 400px;
-            margin: auto;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        }
-        h2 {
-            color: #007bff;
-            text-align: center;
-        }
-        label, input {
-            display: block;
-            width: 100%;
-            margin-bottom: 15px;
-        }
-        input[type="submit"] {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-        }
-        .msg {
-            color: green;
-            text-align: center;
-        }
-        .error {
-            color: red;
-            text-align: center;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="doctor-set-password.css"> <!-- Link to the new doctor-set-password.css -->
 </head>
-<%
-    String msg = (String) session.getAttribute("msg");
-    if (msg != null) {
-%>
-    <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
-        <%= msg %>
+<body class="auth-page"> <!-- Use auth-page class for consistent styling -->
+    <div class="auth-container"> <!-- Use auth-container for consistent styling -->
+        <%
+            String msg = (String) session.getAttribute("msg");
+            if (msg != null) {
+        %>
+            <div class="message-box success">
+                <%= msg %>
+            </div>
+        <%
+                session.removeAttribute("msg");
+            }
+        %>
+        <h2>Set Password</h2>
+        <form action="<%= request.getContextPath() %>/setDoctorPassword" method="post">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+                <label for="password">New Password:</label>
+                <input type="password" id="password" name="password" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Set Password</button> <!-- Use btn btn-primary class -->
+        </form>
     </div>
-<%
-        session.removeAttribute("msg");
-    }
-%>
-
-<body>
-
-<div class="container">
-    <h2>Set Password</h2>
-   <form action="<%= request.getContextPath() %>/setDoctorPassword" method="post">
-    <label>Email:</label>
-    <input type="email" name="email" required />
-    <label>New Password:</label>
-    <input type="password" name="password" required />
-    <button type="submit">Set Password</button>
-</form>
-
-
-  
-</div>
-
 </body>
 </html>
