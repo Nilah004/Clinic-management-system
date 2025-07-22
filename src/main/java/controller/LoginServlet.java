@@ -34,7 +34,7 @@ public class LoginServlet extends HttpServlet {
                     res.sendRedirect("view/doctorDashboard.jsp");
                     break;
                 case "patient":
-                    res.sendRedirect("view/patientDashboard.jsp");
+                    res.sendRedirect("view/index.jsp");
                     break;
                 default:
                     res.sendRedirect("error.jsp");
