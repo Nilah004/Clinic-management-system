@@ -1,4 +1,3 @@
-// src/controller/LogoutServlet.java
 package controller;
 
 import jakarta.servlet.ServletException;

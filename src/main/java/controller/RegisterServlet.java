@@ -1,4 +1,3 @@
-// src/controller/RegisterServlet.java
 package controller;
 
 import java.io.IOException;

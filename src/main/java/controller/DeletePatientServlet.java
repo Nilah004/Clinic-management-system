@@ -1,4 +1,3 @@
-// src/controller/DeletePatientServlet.java
 package controller;
 
 import dao.UserDAO;

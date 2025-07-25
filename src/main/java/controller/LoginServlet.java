@@ -1,4 +1,3 @@
-// src/controller/LoginServlet.java
 package controller;
 
 import java.io.IOException;

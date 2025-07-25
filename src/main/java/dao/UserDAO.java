@@ -2,59 +2,73 @@ package dao;
 
 import model.User;
 import util.DBConnection;
+import util.PasswordUtil;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
 
-    public User login(String email, String password) {
-        try (Connection con = DBConnection.getConnection()) {
-            String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                User user = new User();
-                user.setId(rs.getInt("id"));
-                user.setName(rs.getString("name"));
-                user.setEmail(rs.getString("email"));
-                user.setRole(rs.getString("role"));
-                return user;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	public User login(String email, String password) {
+	    try (Connection con = DBConnection.getConnection()) {
+	        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        String hashed = PasswordUtil.hashPassword(password);
+	        
+	        System.out.println("Trying to log in with:");
+	        System.out.println("Email: " + email);
+	        System.out.println("Hashed Password: " + hashed);
 
-    public boolean register(User user) {
-        try (Connection con = DBConnection.getConnection()) {
-            String sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'patient')";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, user.getName());
-            ps.setString(2, user.getEmail());
-            ps.setString(3, user.getPassword());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+	        ps.setString(1, email);
+	        ps.setString(2, hashed);
+	        
+	        ResultSet rs = ps.executeQuery();
+	        if (rs.next()) {
+	            System.out.println("Login success");
+	            User user = new User();
+	            user.setId(rs.getInt("id"));
+	            user.setName(rs.getString("name"));
+	            user.setEmail(rs.getString("email"));
+	            user.setRole(rs.getString("role"));
+	            return user;
+	        } else {
+	            System.out.println("Login failed");
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
 
-    public boolean setDoctorPassword(String email, String password) {
-        try (Connection con = DBConnection.getConnection()) {
-            String query = "UPDATE users SET password = ? WHERE email = ? AND role = 'doctor'";
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.setString(1, password);
-            ps.setString(2, email);
-            return ps.executeUpdate() == 1;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+	public boolean register(User user) {
+	    try (Connection con = DBConnection.getConnection()) {
+	        String sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'patient')";
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        ps.setString(1, user.getName());
+	        ps.setString(2, user.getEmail());
+	        ps.setString(3, PasswordUtil.hashPassword(user.getPassword())); //  hash
+	        return ps.executeUpdate() > 0;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
+
+
+	public boolean setDoctorPassword(String email, String password) {
+	    try (Connection con = DBConnection.getConnection()) {
+	        String query = "UPDATE users SET password = ? WHERE email = ? AND role = 'doctor'";
+	        PreparedStatement ps = con.prepareStatement(query);
+	        ps.setString(1, PasswordUtil.hashPassword(password)); // 🔒 hash
+	        ps.setString(2, email);
+	        return ps.executeUpdate() == 1;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+
 
     public List<User> getAllPatients() {
         List<User> list = new ArrayList<>();
@@ -108,4 +122,10 @@ public class UserDAO {
             return false;
         }
     }
+    
+    public static void main(String[] args) {
+        String hashed = PasswordUtil.hashPassword("admin123");
+        System.out.println("Hashed admin123: " + hashed);
+    }
+
 }

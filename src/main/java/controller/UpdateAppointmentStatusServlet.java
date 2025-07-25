@@ -1,4 +1,3 @@
-// controller/UpdateAppointmentStatusServlet.java
 package controller;
 
 import dao.AppointmentDAO;

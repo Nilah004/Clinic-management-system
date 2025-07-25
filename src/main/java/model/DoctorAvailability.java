@@ -1,4 +1,3 @@
-// src/model/DoctorAvailability.java
 package model;
 
 import java.sql.Time;

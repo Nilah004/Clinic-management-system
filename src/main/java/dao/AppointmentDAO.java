@@ -1,4 +1,3 @@
-// src/dao/AppointmentDAO.java
 package dao;
 
 import java.sql.*;

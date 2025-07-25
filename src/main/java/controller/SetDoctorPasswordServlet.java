@@ -1,4 +1,3 @@
-// src/controller/SetDoctorPasswordServlet.java
 package controller;
 
 import dao.UserDAO;
